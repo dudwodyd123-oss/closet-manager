@@ -171,121 +171,68 @@ body {
   font-style: italic;
 }
 
-/* ── DASHBOARD BODY ── */
-.dashboard-body {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .dashboard-body { grid-template-columns: 1fr; }
-}
-
-/* ── RECOMMEND AREA ── */
-.recommend-area {
-  background: rgba(255,255,255,0.8);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  border: 1px solid rgba(178,237,224,0.5);
-  box-shadow: var(--shadow-card);
-}
-
-.recommend-summary {
-  min-height: 120px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  align-content: flex-start;
-  padding: 0.5rem 0;
-}
-
-.empty-hint {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  margin: auto;
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.recommend-item {
-  background: var(--mint-light);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 0.9rem;
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.recommend-item img {
-  width: 48px; height: 48px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-.recommend-item-info { display: flex; flex-direction: column; gap: 0.15rem; }
-.recommend-item-name { font-weight: 500; }
-.recommend-item-cat { font-size: 0.76rem; color: var(--text-light); }
-
-/* ── ACTION BUTTONS ── */
-.outfit-actions {
-  display: flex;
-  gap: 0.8rem;
-  margin-top: 1.2rem;
-  flex-wrap: wrap;
-}
-
-.btn-action {
-  border: none;
-  border-radius: 30px;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.88rem;
-  font-family: 'SUIT', sans-serif;
-  cursor: pointer;
-  font-weight: 500;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.btn-action:hover { transform: translateY(-1px); }
-.btn-wear { background: linear-gradient(135deg, var(--mint), var(--mint-dark)); color: white; box-shadow: 0 3px 12px rgba(125,207,188,0.35); }
-.btn-fav  { background: linear-gradient(135deg, var(--pink), #f9a3a3); color: white; box-shadow: 0 3px 12px rgba(252,165,165,0.35); }
-
-/* ── OUTFIT PANEL (ASIDE) ── */
-.outfit-panel {
+/* ── COMBO BOARD (통합 코디 조합판) ── */
+.combo-board {
   background: rgba(255,255,255,0.85);
   border-radius: var(--radius);
-  padding: 1.2rem;
+  padding: 1.6rem;
   border: 1px solid rgba(178,237,224,0.5);
   box-shadow: var(--shadow-card);
 }
 
-.panel-title {
-  font-family: 'SUIT', serif;
-  font-size: 1rem;
-  margin-bottom: 0.9rem;
-  color: var(--text);
+.combo-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
 }
 
-.outfit-grid {
+.combo-desc {
+  font-size: 0.83rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+/* 추천 태그 행 */
+.rec-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+.rec-tag-row.hidden { display: none; }
+.rec-tag-label { margin-right: 0.2rem; }
+
+/* 슬롯 그리드 */
+.combo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.7rem;
+  gap: 0.9rem;
+  margin-bottom: 1.2rem;
 }
 
-.grid-slot {
+.combo-slot {
   background: var(--cream);
   border-radius: var(--radius-sm);
-  padding: 0.6rem;
+  padding: 0.8rem 0.6rem 0.6rem;
   border: 1.5px solid rgba(178,237,224,0.4);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.grid-slot:hover { border-color: var(--mint-dark); }
-.grid-slot.full-width { grid-column: 1 / -1; }
+.combo-slot:hover { border-color: var(--mint-dark); box-shadow: 0 2px 10px rgba(125,207,188,0.2); }
+.combo-slot.full-width { grid-column: 1 / -1; }
 
 .slot-label {
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--text-light);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
@@ -293,40 +240,42 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
 .slot-img-wrap {
-  width: 72px; height: 72px;
+  width: 100px; height: 100px;
   position: relative;
   flex-shrink: 0;
 }
-.grid-slot.full-width .slot-img-wrap { width: 80px; height: 80px; }
+.combo-slot.full-width .slot-img-wrap { width: 110px; height: 110px; }
 
 .slot-img {
   width: 100%; height: 100%;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
   display: none;
 }
 .slot-empty {
   width: 100%; height: 100%;
-  border-radius: 8px;
-  background: rgba(178,237,224,0.2);
+  border-radius: 10px;
+  background: rgba(178,237,224,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
   color: var(--text-light);
   border: 1.5px dashed rgba(178,237,224,0.6);
+  text-align: center;
+  padding: 0.3rem;
 }
 
 .slot-nav {
   background: white;
   border: 1.5px solid var(--mint);
   border-radius: 50%;
-  width: 24px; height: 24px;
-  font-size: 1rem;
+  width: 28px; height: 28px;
+  font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
   color: var(--mint-dark);
@@ -336,11 +285,52 @@ body {
 }
 .slot-nav:hover { background: var(--mint-light); }
 
+.slot-name {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 0.4rem;
+  text-align: center;
+  min-height: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .slot-counter {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-light);
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
+}
+
+/* ── ACTION BUTTONS ── */
+.outfit-actions {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  border: none;
+  border-radius: 30px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.9rem;
+  font-family: 'SUIT', sans-serif;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-action:hover { transform: translateY(-1px); }
+.btn-wear { background: linear-gradient(135deg, var(--mint), var(--mint-dark)); color: white; box-shadow: 0 3px 12px rgba(125,207,188,0.35); }
+.btn-fav  { background: linear-gradient(135deg, var(--pink), #f9a3a3); color: white; box-shadow: 0 3px 12px rgba(252,165,165,0.35); }
+
+.empty-hint {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  text-align: center;
+  padding: 2rem 0;
 }
 
 /* ── CLOSET TAB ── */
@@ -676,8 +666,12 @@ body {
   .nav-logo { font-size: 1rem; }
   .nav-btn { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
   .tab-content { padding: calc(var(--nav-h) + 0.8rem) 0.8rem 1.5rem; }
-  .dashboard-body { grid-template-columns: 1fr; }
-  .outfit-grid { grid-template-columns: 1fr 1fr; }
+  .combo-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .slot-img-wrap { width: 76px; height: 76px; }
+  .combo-slot.full-width .slot-img-wrap { width: 86px; height: 86px; }
   .clothes-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .cloth-img { height: 130px; }
+  .combo-header { flex-direction: column; gap: 0.3rem; }
+  .outfit-actions { gap: 0.5rem; }
+  .btn-action { padding: 0.55rem 1rem; font-size: 0.82rem; }
 }

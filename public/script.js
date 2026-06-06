@@ -255,8 +255,7 @@ function buildRecommendation() {
   const CATS = ['악세사리', '상의', '겉옷', '하의', '신발'];
 
   CATS.forEach(cat => {
-    const pool = clothes.filter(c => c.category === cat || (cat === '악세사리' && c.category === '악세사리'));
-    // score & sort
+    const pool = clothes.filter(c => c.category === cat);
     const scored = pool.map(c => ({ ...c, score: scoreClothe(c, recTags) }));
     scored.sort((a, b) => b.score - a.score);
     slotCandidates[cat] = scored;
@@ -264,9 +263,17 @@ function buildRecommendation() {
     renderSlot(cat);
   });
 
-  // Summary
-  renderRecommendSummary(recTags, temp, pty, sky);
-  document.getElementById('outfitActions').style.display = 'flex';
+  // 추천 태그 행 업데이트
+  const tagRow = document.getElementById('recTagRow');
+  if (recTags.length > 0) {
+    tagRow.classList.remove('hidden');
+    tagRow.innerHTML = '<span class="rec-tag-label">📌 추천 키워드:</span>' +
+      recTags.map(t => `<span class="cloth-tag">${t}</span>`).join('') +
+      (temp !== null ? `<span style="margin-left:.5rem;color:var(--mint-dark);font-weight:500">${temp}°C · ${getSkyDesc(sky, pty)}</span>` : '');
+  }
+
+  // 설명 문구 업데이트
+  document.getElementById('comboDesc').textContent = '< > 버튼으로 각 카테고리 아이템을 바꿔가며 나만의 코디를 완성해보세요!';
 }
 
 function renderSlot(cat) {
@@ -275,11 +282,14 @@ function renderSlot(cat) {
   const img  = document.getElementById(`slot-${cat}`);
   const empty = document.getElementById(`empty-${cat}`);
   const counter = document.getElementById(`counter-${cat}`);
+  const nameEl = document.getElementById(`name-${cat}`);
 
   if (!list || list.length === 0) {
     img.style.display = 'none';
     empty.style.display = 'flex';
+    empty.textContent = '없음';
     counter.textContent = '0/0';
+    if (nameEl) nameEl.textContent = '';
     return;
   }
   const item = list[idx];
@@ -291,34 +301,13 @@ function renderSlot(cat) {
   } else {
     img.style.display = 'none';
     empty.style.display = 'flex';
-    empty.textContent = item.name;
+    empty.textContent = catEmoji(cat);
   }
+  if (nameEl) nameEl.textContent = item.name;
   counter.textContent = `${idx + 1}/${list.length}`;
 }
 
-function renderRecommendSummary(recTags, temp, pty, sky) {
-  const el = document.getElementById('recommendSummary');
-  if (!weatherState.loaded) { el.innerHTML = '<p class="empty-hint">날씨를 조회하면 옷장에서 어울리는 아이템을 골라드려요.</p>'; return; }
-
-  let html = `<div style="width:100%;margin-bottom:.5rem;font-size:.82rem;color:var(--text-light)">`;
-  if (temp !== null) html += `오늘 기온 <strong>${temp}°C</strong> · ${getSkyDesc(sky, pty)} 기준 추천 키워드: `;
-  recTags.forEach(t => { html += `<span class="cloth-tag" style="display:inline-block;margin:.1rem">${t}</span>`; });
-  html += '</div>';
-
-  const CATS = ['상의', '하의', '겉옷', '악세사리', '신발'];
-  CATS.forEach(cat => {
-    const list = slotCandidates[cat];
-    if (!list || list.length === 0) return;
-    const item = list[slotIndex[cat] || 0];
-    html += `<div class="recommend-item">`;
-    if (item.image) html += `<img src="${item.image}" alt="${item.name}"/>`;
-    else html += `<div style="width:48px;height:48px;border-radius:6px;background:var(--mint-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem">${catEmoji(cat)}</div>`;
-    html += `<div class="recommend-item-info"><span class="recommend-item-name">${item.name}</span><span class="recommend-item-cat">${cat}</span></div></div>`;
-  });
-
-  if (html.indexOf('recommend-item') === -1) html += '<p class="empty-hint">옷장에 옷을 먼저 추가해 주세요!</p>';
-  el.innerHTML = html;
-}
+// renderRecommendSummary 제거됨 — 통합 코디 조합판으로 대체
 
 function catEmoji(cat) {
   const map = { '상의':'👔','하의':'👖','겉옷':'🧥','원피스':'👗','신발':'👟','악세사리':'🎩' };

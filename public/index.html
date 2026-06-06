@@ -37,7 +37,6 @@
         <span id="weatherIcon" class="weather-icon"></span>
         <span id="weatherTemp" class="weather-temp"></span>
         <span id="weatherDesc" class="weather-desc"></span>
-        <span id="weatherHumidity" class="weather-humidity"></span>
       </div>
       <div id="weatherError" class="weather-error hidden"></div>
     </div>
@@ -46,100 +45,103 @@
     </div>
   </div>
 
-  <!-- Main area: Recommendation + Aside Panel -->
-  <div class="dashboard-body">
-
-    <!-- Left: Recommendation summary -->
-    <div class="recommend-area">
-      <h2 class="section-title">오늘의 추천 코디</h2>
-      <div id="recommendSummary" class="recommend-summary">
-        <p class="empty-hint">날씨를 조회하면 옷장에서 어울리는 아이템을 골라드려요.</p>
-      </div>
-
-      <!-- Action buttons -->
-      <div class="outfit-actions" id="outfitActions" style="display:none">
-        <button class="btn-action btn-wear" id="btnSelectOutfit">👕 오늘의 코디 선택</button>
-        <button class="btn-action btn-fav"  id="btnFavorite">⭐ 즐겨찾기 추가</button>
-      </div>
+  <!-- 통합 코디 조합판 -->
+  <div class="combo-board">
+    <div class="combo-header">
+      <h2 class="section-title" style="margin:0">👗 오늘의 코디 조합판</h2>
+      <p class="combo-desc" id="comboDesc">날씨를 조회하면 추천 아이템이 채워져요. &lt; &gt; 버튼으로 조합을 바꿔보세요!</p>
     </div>
 
-    <!-- Right: Outfit grid panel (aside) -->
-    <aside class="outfit-panel">
-      <h3 class="panel-title">코디 조합판</h3>
-      <div class="outfit-grid">
+    <!-- 추천 태그 표시 -->
+    <div id="recTagRow" class="rec-tag-row hidden"></div>
 
-        <!-- Hat/Acc row -->
-        <div class="grid-slot full-width" data-cat="악세사리">
-          <div class="slot-label">🎩 모자 / 악세사리</div>
-          <div class="slot-inner">
-            <button class="slot-nav prev" data-cat="악세사리">&#8249;</button>
-            <div class="slot-img-wrap">
-              <img class="slot-img" id="slot-악세사리" src="" alt="" />
-              <div class="slot-empty" id="empty-악세사리">없음</div>
-            </div>
-            <button class="slot-nav next" data-cat="악세사리">&#8250;</button>
+    <!-- 슬롯 그리드 -->
+    <div class="combo-grid">
+
+      <!-- 악세사리 (full width) -->
+      <div class="combo-slot full-width" data-cat="악세사리">
+        <div class="slot-label">🎩 모자 / 악세사리</div>
+        <div class="slot-inner">
+          <button class="slot-nav prev" data-cat="악세사리">&#8249;</button>
+          <div class="slot-img-wrap">
+            <img class="slot-img" id="slot-악세사리" src="" alt="" />
+            <div class="slot-empty" id="empty-악세사리">없음</div>
           </div>
-          <div class="slot-counter" id="counter-악세사리">0/0</div>
+          <button class="slot-nav next" data-cat="악세사리">&#8250;</button>
         </div>
+        <div class="slot-name" id="name-악세사리"></div>
+        <div class="slot-counter" id="counter-악세사리">0/0</div>
+      </div>
 
-        <!-- Top + Outer row -->
-        <div class="grid-slot" data-cat="상의">
-          <div class="slot-label">👔 상의</div>
-          <div class="slot-inner">
-            <button class="slot-nav prev" data-cat="상의">&#8249;</button>
-            <div class="slot-img-wrap">
-              <img class="slot-img" id="slot-상의" src="" alt="" />
-              <div class="slot-empty" id="empty-상의">없음</div>
-            </div>
-            <button class="slot-nav next" data-cat="상의">&#8250;</button>
+      <!-- 상의 -->
+      <div class="combo-slot" data-cat="상의">
+        <div class="slot-label">👔 상의</div>
+        <div class="slot-inner">
+          <button class="slot-nav prev" data-cat="상의">&#8249;</button>
+          <div class="slot-img-wrap">
+            <img class="slot-img" id="slot-상의" src="" alt="" />
+            <div class="slot-empty" id="empty-상의">없음</div>
           </div>
-          <div class="slot-counter" id="counter-상의">0/0</div>
+          <button class="slot-nav next" data-cat="상의">&#8250;</button>
         </div>
+        <div class="slot-name" id="name-상의"></div>
+        <div class="slot-counter" id="counter-상의">0/0</div>
+      </div>
 
-        <div class="grid-slot" data-cat="겉옷">
-          <div class="slot-label">🧥 겉옷</div>
-          <div class="slot-inner">
-            <button class="slot-nav prev" data-cat="겉옷">&#8249;</button>
-            <div class="slot-img-wrap">
-              <img class="slot-img" id="slot-겉옷" src="" alt="" />
-              <div class="slot-empty" id="empty-겉옷">없음</div>
-            </div>
-            <button class="slot-nav next" data-cat="겉옷">&#8250;</button>
+      <!-- 겉옷 -->
+      <div class="combo-slot" data-cat="겉옷">
+        <div class="slot-label">🧥 겉옷</div>
+        <div class="slot-inner">
+          <button class="slot-nav prev" data-cat="겉옷">&#8249;</button>
+          <div class="slot-img-wrap">
+            <img class="slot-img" id="slot-겉옷" src="" alt="" />
+            <div class="slot-empty" id="empty-겉옷">없음</div>
           </div>
-          <div class="slot-counter" id="counter-겉옷">0/0</div>
+          <button class="slot-nav next" data-cat="겉옷">&#8250;</button>
         </div>
+        <div class="slot-name" id="name-겉옷"></div>
+        <div class="slot-counter" id="counter-겉옷">0/0</div>
+      </div>
 
-        <!-- Bottom + Extra row -->
-        <div class="grid-slot" data-cat="하의">
-          <div class="slot-label">👖 하의</div>
-          <div class="slot-inner">
-            <button class="slot-nav prev" data-cat="하의">&#8249;</button>
-            <div class="slot-img-wrap">
-              <img class="slot-img" id="slot-하의" src="" alt="" />
-              <div class="slot-empty" id="empty-하의">없음</div>
-            </div>
-            <button class="slot-nav next" data-cat="하의">&#8250;</button>
+      <!-- 하의 -->
+      <div class="combo-slot" data-cat="하의">
+        <div class="slot-label">👖 하의</div>
+        <div class="slot-inner">
+          <button class="slot-nav prev" data-cat="하의">&#8249;</button>
+          <div class="slot-img-wrap">
+            <img class="slot-img" id="slot-하의" src="" alt="" />
+            <div class="slot-empty" id="empty-하의">없음</div>
           </div>
-          <div class="slot-counter" id="counter-하의">0/0</div>
+          <button class="slot-nav next" data-cat="하의">&#8250;</button>
         </div>
+        <div class="slot-name" id="name-하의"></div>
+        <div class="slot-counter" id="counter-하의">0/0</div>
+      </div>
 
-        <div class="grid-slot" data-cat="신발">
-          <div class="slot-label">👟 신발</div>
-          <div class="slot-inner">
-            <button class="slot-nav prev" data-cat="신발">&#8249;</button>
-            <div class="slot-img-wrap">
-              <img class="slot-img" id="slot-신발" src="" alt="" />
-              <div class="slot-empty" id="empty-신발">없음</div>
-            </div>
-            <button class="slot-nav next" data-cat="신발">&#8250;</button>
+      <!-- 신발 -->
+      <div class="combo-slot" data-cat="신발">
+        <div class="slot-label">👟 신발</div>
+        <div class="slot-inner">
+          <button class="slot-nav prev" data-cat="신발">&#8249;</button>
+          <div class="slot-img-wrap">
+            <img class="slot-img" id="slot-신발" src="" alt="" />
+            <div class="slot-empty" id="empty-신발">없음</div>
           </div>
-          <div class="slot-counter" id="counter-신발">0/0</div>
+          <button class="slot-nav next" data-cat="신발">&#8250;</button>
         </div>
+        <div class="slot-name" id="name-신발"></div>
+        <div class="slot-counter" id="counter-신발">0/0</div>
+      </div>
 
-      </div><!-- /outfit-grid -->
-    </aside>
+    </div><!-- /combo-grid -->
 
-  </div><!-- /dashboard-body -->
+    <!-- 액션 버튼 -->
+    <div class="outfit-actions" id="outfitActions">
+      <button class="btn-action btn-wear" id="btnSelectOutfit">👕 오늘의 코디 선택</button>
+      <button class="btn-action btn-fav" id="btnFavorite">⭐ 즐겨찾기 추가</button>
+    </div>
+
+  </div><!-- /combo-board -->
 </section>
 
 <!-- ════════════════════════════════

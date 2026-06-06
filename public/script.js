@@ -1,16 +1,26 @@
-/*
- * 옷장 관리 웹앱 — script.js
- *
- * 날씨 API: 기상청 단기예보 조회서비스 (VilageFcstInfoService_2.0)
- * ⚠️  YOUR_API_KEY 를 발급받은 serviceKey(URL Encode 값)로 교체하세요.
- *
- * API 엔드포인트:
- *   초단기실황: getUltraSrtNcst   → 현재 기온(T1H), 강수형태(PTY)
- *   초단기예보: getUltraSrtFcst   → 하늘상태(SKY)
- * 기상청 API는 브라우저에서 직접 호출 시 CORS 오류가 발생합니다.
- * CORS 우회를 위해 cors-anywhere 프록시를 사용합니다.
- * 실서비스 배포 시에는 서버사이드에서 호출하거나 별도 프록시를 구성하세요.
- */
+if (!localStorage.getItem('closet_clothes')) {
+  const now = Date.now();
+  const dAgo = d => new Date(now - d * 86400000).toISOString();
+  const sampleClothes = [
+    { id: 1,  name: '흰 기본 티셔츠',    category: '상의',    tags: ['반팔','데일리','캐주얼','여름용'],        memo: '', image: null, wearCount: 12, lastWorn: dAgo(2),  createdAt: dAgo(60) },
+    { id: 2,  name: '네이비 긴팔 티셔츠', category: '상의',    tags: ['긴팔','데일리','캐주얼','봄/가을용'],     memo: '', image: null, wearCount: 7,  lastWorn: dAgo(5),  createdAt: dAgo(90) },
+    { id: 3,  name: '린넨 셔츠',          category: '상의',    tags: ['얇은','반팔','캐주얼','여름용'],          memo: '', image: null, wearCount: 4,  lastWorn: dAgo(10), createdAt: dAgo(30) },
+    { id: 4,  name: '울 니트',            category: '상의',    tags: ['긴팔','두꺼운','겨울용'],                 memo: '', image: null, wearCount: 3,  lastWorn: dAgo(30), createdAt: dAgo(120) },
+    { id: 5,  name: '청바지',             category: '하의',    tags: ['데일리','캐주얼'],                        memo: '', image: null, wearCount: 20, lastWorn: dAgo(1),  createdAt: dAgo(180) },
+    { id: 6,  name: '베이지 슬랙스',      category: '하의',    tags: ['데일리','포멀','봄/가을용'],              memo: '', image: null, wearCount: 8,  lastWorn: dAgo(7),  createdAt: dAgo(50) },
+    { id: 7,  name: '반바지',             category: '하의',    tags: ['반팔','캐주얼','여름용','얇은'],          memo: '', image: null, wearCount: 6,  lastWorn: dAgo(14), createdAt: dAgo(40) },
+    { id: 8,  name: '후드 집업',          category: '겉옷',    tags: ['두꺼운','캐주얼','봄/가을용'],            memo: '', image: null, wearCount: 5,  lastWorn: dAgo(8),  createdAt: dAgo(100) },
+    { id: 9,  name: '트렌치코트',         category: '겉옷',    tags: ['얇은','포멀','봄/가을용'],                memo: '', image: null, wearCount: 2,  lastWorn: dAgo(20), createdAt: dAgo(70) },
+    { id: 10, name: '패딩',               category: '겉옷',    tags: ['두꺼운','겨울용'],                        memo: '', image: null, wearCount: 0,  lastWorn: null,     createdAt: dAgo(150) },
+    { id: 11, name: '우비',               category: '겉옷',    tags: ['방수','얇은'],                            memo: '', image: null, wearCount: 1,  lastWorn: dAgo(45), createdAt: dAgo(200) },
+    { id: 12, name: '흰 스니커즈',        category: '신발',    tags: ['데일리','캐주얼'],                        memo: '', image: null, wearCount: 18, lastWorn: dAgo(1),  createdAt: dAgo(365) },
+    { id: 13, name: '로퍼',               category: '신발',    tags: ['포멀','데일리'],                          memo: '', image: null, wearCount: 6,  lastWorn: dAgo(9),  createdAt: dAgo(80) },
+    { id: 14, name: '샌들',               category: '신발',    tags: ['여름용','캐주얼'],                        memo: '', image: null, wearCount: 0,  lastWorn: null,     createdAt: dAgo(20) },
+    { id: 15, name: '볼캡',               category: '악세사리', tags: ['캐주얼','데일리','여름용'],               memo: '', image: null, wearCount: 9,  lastWorn: dAgo(3),  createdAt: dAgo(200) },
+    { id: 16, name: '우산',               category: '악세사리', tags: ['방수','우산'],                           memo: '', image: null, wearCount: 3,  lastWorn: dAgo(15), createdAt: dAgo(300) },
+  ];
+  localStorage.setItem('closet_clothes', JSON.stringify(sampleClothes));
+}
 
 const API_KEY = '367209827091689d3216d2aa03b8d56e717205e6a7ee49cb27dea0b8391998a5';
 

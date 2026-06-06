@@ -256,7 +256,9 @@ function buildRecommendation() {
 
   CATS.forEach(cat => {
     const pool = clothes.filter(c => c.category === cat);
-    const scored = pool.map(c => ({ ...c, score: scoreClothe(c, recTags) }));
+    const scored = pool
+      .map(c => ({ ...c, score: scoreClothe(c, recTags) }))
+      .filter(c => c.score > 0);          // ← 태그 매칭된 옷만
     scored.sort((a, b) => b.score - a.score);
     slotCandidates[cat] = scored;
     slotIndex[cat] = 0;
@@ -287,7 +289,7 @@ function renderSlot(cat) {
   if (!list || list.length === 0) {
     img.style.display = 'none';
     empty.style.display = 'flex';
-    empty.textContent = '없음';
+    empty.textContent = weatherState.loaded ? '해당 없음' : '날씨 조회 후\n표시됩니다';
     counter.textContent = '0/0';
     if (nameEl) nameEl.textContent = '';
     return;
@@ -706,9 +708,8 @@ document.getElementById('locationInput').addEventListener('keydown', e => {
 renderTagFilter();
 updateStatsRow();
 
-// 슬롯 초기 렌더 (옷 있으면 날씨 없어도 목록 표시)
+// 슬롯은 날씨 조회 후에만 채워짐
 const CATS = ['악세사리', '상의', '겉옷', '하의', '신발'];
 CATS.forEach(cat => {
-  slotCandidates[cat] = loadClothes().filter(c => c.category === cat);
   renderSlot(cat);
 });

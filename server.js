@@ -5,7 +5,7 @@ const path = require("path");
 const app = express();
 
 const API_KEY =
-  "지원님기상청apikey";
+  "367209827091689d3216d2aa03b8d56e717205e6a7ee49cb27dea0b8391998a5";
 
 app.use(express.static(__dirname));
 
@@ -34,6 +34,9 @@ app.get("/weather", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
+const PORT = process.env.PORT || 3000;
+
+
+app.listen(PORT, () => {
   console.log("server running");
 });

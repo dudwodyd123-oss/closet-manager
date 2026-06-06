@@ -289,7 +289,7 @@ function renderSlot(cat) {
   if (!list || list.length === 0) {
     img.style.display = 'none';
     empty.style.display = 'flex';
-    empty.textContent = weatherState.loaded ? '해당 없음' : '날씨 조회 후\n표시됩니다';
+    empty.textContent = weatherState.loaded ? '해당 없음' : '없음';
     counter.textContent = '0/0';
     if (nameEl) nameEl.textContent = '';
     return;
@@ -730,11 +730,17 @@ document.getElementById('locationInput').addEventListener('keydown', e => {
 // ─────────────────────────────────────────
 //  초기화
 // ─────────────────────────────────────────
+renderCloset();
+renderWearSummary();
 renderTagFilter();
 updateStatsRow();
+renderOutfits();
+renderFavorites();
 
-// 슬롯은 날씨 조회 후에만 채워짐
+// 슬롯: 날씨 조회 전에는 전체 옷 목록으로 채워둠
 const CATS = ['악세사리', '상의', '겉옷', '하의', '신발'];
 CATS.forEach(cat => {
+  slotCandidates[cat] = loadClothes().filter(c => c.category === cat);
+  slotIndex[cat] = 0;
   renderSlot(cat);
 });

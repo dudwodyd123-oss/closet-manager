@@ -406,7 +406,9 @@ body {
   min-width: 150px;
   border: 1px solid rgba(178,237,224,0.4);
 }
-.wear-card h4 { font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.3rem; }
+.wear-card h4 { font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.wear-card p em { font-style: normal; color: var(--mint-dark); font-size: 0.85em; }
+.wear-filter-badge { font-size: 0.68rem; background: var(--mint-light); color: var(--mint-dark); border-radius: 20px; padding: 0.1rem 0.5rem; font-weight: 400; white-space: nowrap; }
 .wear-card p { font-weight: 500; }
 
 /* ── CLOTHES GRID ── */

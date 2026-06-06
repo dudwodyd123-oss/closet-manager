@@ -569,6 +569,8 @@ function renderCloset() {
       }
     });
   });
+
+  renderWearSummary();
 }
 
 function updateStatsRow() {
@@ -582,26 +584,49 @@ function updateStatsRow() {
 }
 
 function renderWearSummary() {
-  const clothes = loadClothes();
-  if (clothes.length === 0) { document.getElementById('wearSummary').innerHTML = ''; return; }
+  const allClothes = loadClothes();
+  if (allClothes.length === 0) { document.getElementById('wearSummary').innerHTML = ''; return; }
 
-  const sorted = [...clothes].sort((a, b) => (b.wearCount||0) - (a.wearCount||0));
-  const top = sorted[0];
-  const rarely = sorted.filter(c => (c.wearCount||0) === 0);
-  const oldest = clothes.filter(c=>c.lastWorn).sort((a,b)=>new Date(a.lastWorn)-new Date(b.lastWorn))[0];
+  // 현재 활성 필터 기준으로 대상 옷 추리기
+  const pool = allClothes.filter(c => {
+    if (activeFilterCat && c.category !== activeFilterCat) return false;
+    if (activeFilterTag && !c.tags.includes(activeFilterTag)) return false;
+    return true;
+  });
+
+  // 필터 레이블 표시 (무엇 기준인지)
+  const filterLabel = activeFilterCat
+    ? `'${activeFilterCat}' 중`
+    : activeFilterTag
+      ? `'${activeFilterTag}' 태그 중`
+      : '전체 옷 중';
+
+  if (pool.length === 0) {
+    document.getElementById('wearSummary').innerHTML =
+      `<div class="wear-card" style="grid-column:1/-1"><p style="color:var(--text-light)">해당 조건의 옷이 없어요.</p></div>`;
+    return;
+  }
+
+  const sorted = [...pool].sort((a, b) => (b.wearCount||0) - (a.wearCount||0));
+  const top    = sorted[0];
+  const unworn = pool.filter(c => (c.wearCount||0) === 0);
+  const oldest = pool.filter(c => c.lastWorn)
+    .sort((a, b) => new Date(a.lastWorn) - new Date(b.lastWorn))[0];
 
   document.getElementById('wearSummary').innerHTML = `
     <div class="wear-card">
-      <h4>🏆 가장 많이 입은 옷</h4>
-      <p>${top ? `${top.name} (${top.wearCount||0}회)` : '—'}</p>
+      <h4>🏆 가장 많이 입은 옷 <span class="wear-filter-badge">${filterLabel}</span></h4>
+      <p>${top && top.wearCount > 0 ? `${top.name} <em>(${top.wearCount}회)</em>` : '아직 없어요'}</p>
     </div>
     <div class="wear-card">
-      <h4>🆕 아직 안 입은 옷</h4>
-      <p>${rarely.length > 0 ? rarely.map(c=>c.name).slice(0,2).join(', ') + (rarely.length>2 ? ` 외 ${rarely.length-2}개` : '') : '없음'}</p>
+      <h4>🆕 아직 안 입은 옷 <span class="wear-filter-badge">${filterLabel}</span></h4>
+      <p>${unworn.length > 0
+        ? unworn.map(c => c.name).slice(0, 3).join(', ') + (unworn.length > 3 ? ` 외 ${unworn.length - 3}개` : '')
+        : '없음'}</p>
     </div>
     <div class="wear-card">
-      <h4>🕰️ 오래 안 입은 옷</h4>
-      <p>${oldest ? `${oldest.name} (${timeAgo(oldest.lastWorn)} 전)` : '—'}</p>
+      <h4>🕰️ 오래 안 입은 옷 <span class="wear-filter-badge">${filterLabel}</span></h4>
+      <p>${oldest ? `${oldest.name} <em>(${timeAgo(oldest.lastWorn)} 전)</em>` : '—'}</p>
     </div>
   `;
 }

@@ -9,6 +9,10 @@ const API_KEY =
 
 app.use(express.static(__dirname));
 
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
 app.get("/weather", async (req, res) => {
   try {
     const query = new URLSearchParams(req.query).toString();

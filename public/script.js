@@ -22,7 +22,8 @@ if (!localStorage.getItem('closet_clothes')) {
   localStorage.setItem('closet_clothes', JSON.stringify(sampleClothes));
 }
 
-const API_KEY = '367209827091689d3216d2aa03b8d56e717205e6a7ee49cb27dea0b8391998a5';
+// API 키는 localStorage에서 로드
+function getApiKey() { return localStorage.getItem('closet_api_key') || ''; }
 
 
 // ─────────────────────────────────────────
@@ -122,6 +123,10 @@ function getUltraSrtFcstTime() {
 //  날씨 API 호출
 // ─────────────────────────────────────────
 async function fetchWeather(cityName) {
+  if (!getApiKey()) {
+    showWeatherError('API 키를 먼저 입력하고 저장해 주세요.');
+    return;
+  }
   const coords = findCoords(cityName);
   if (!coords) {
     showWeatherError(`"${cityName}" 지역을 찾을 수 없습니다. 주요 도시명(예: 부산, 서울)으로 입력해 주세요.`);
@@ -134,7 +139,7 @@ async function fetchWeather(cityName) {
   try {
     // 1) 초단기실황 → 기온(T1H), 강수형태(PTY)
     const { baseDate: d1, baseTime: t1 } = getBaseDateTime();
-    const ncstUrl = `/weather?endpoint=getUltraSrtNcst&serviceKey=${API_KEY}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${d1}&base_time=${t1}&nx=${nx}&ny=${ny}`;
+    const ncstUrl = `/weather?endpoint=getUltraSrtNcst&serviceKey=${getApiKey()}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${d1}&base_time=${t1}&nx=${nx}&ny=${ny}`;
 
     const r1 = await fetch(ncstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     const j1 = await r1.json();
@@ -148,7 +153,7 @@ async function fetchWeather(cityName) {
 
     // 2) 초단기예보 → 하늘상태(SKY)
     const { baseDate: d2, baseTime: t2 } = getUltraSrtFcstTime();
-    const fcstUrl = `/weather?endpoint=getUltraSrtFcst&serviceKey=${API_KEY}&numOfRows=60&pageNo=1&dataType=JSON&base_date=${d2}&base_time=${t2}&nx=${nx}&ny=${ny}`;
+    const fcstUrl = `/weather?endpoint=getUltraSrtFcst&serviceKey=${getApiKey()}&numOfRows=60&pageNo=1&dataType=JSON&base_date=${d2}&base_time=${t2}&nx=${nx}&ny=${ny}`;
     const r2 = await fetch(fcstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     const j2 = await r2.json();
 
@@ -239,6 +244,7 @@ function getRecommendTags(temp, pty, sky) {
   }
 
   if (pty >= 1) tags.push('방수', '겉옷');
+  if (weatherState && weatherState.wind) tags.push('겉옷', '두꺼운');
 
   return tags;
 }
@@ -728,6 +734,87 @@ document.getElementById('locationInput').addEventListener('keydown', e => {
 });
 
 // ─────────────────────────────────────────
+//  API 키 저장/로드 UI
+// ─────────────────────────────────────────
+function initApiKeyUI() {
+  const saved = getApiKey();
+  const input  = document.getElementById('apikeyInput');
+  const saveBtn = document.getElementById('saveApiKey');
+  const toggleBtn = document.getElementById('toggleApiKey');
+
+  if (saved) {
+    input.value = saved;
+    input.style.display = 'none';
+    saveBtn.style.display = 'none';
+    toggleBtn.style.display = 'inline-block';
+  }
+
+  saveBtn.addEventListener('click', () => {
+    const key = input.value.trim();
+    if (!key) { alert('API 키를 입력해 주세요.'); return; }
+    localStorage.setItem('closet_api_key', key);
+    input.style.display = 'none';
+    saveBtn.style.display = 'none';
+    toggleBtn.style.display = 'inline-block';
+    alert('API 키가 저장됐어요!');
+  });
+
+  toggleBtn.addEventListener('click', () => {
+    input.style.display = 'inline-block';
+    saveBtn.style.display = 'inline-block';
+    toggleBtn.style.display = 'none';
+    input.focus();
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveBtn.click();
+  });
+}
+
+// ─────────────────────────────────────────
+//  수동 날씨 설정
+// ─────────────────────────────────────────
+let manualState = { temp: null, sky: 1, pty: 0, wind: 0 };
+
+document.getElementById('tempChips').querySelectorAll('.mchip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('tempChips').querySelectorAll('.mchip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    manualState.temp = parseInt(btn.dataset.temp);
+  });
+});
+
+document.getElementById('skyChips').querySelectorAll('.mchip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('skyChips').querySelectorAll('.mchip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (btn.dataset.sky)  { manualState.sky = parseInt(btn.dataset.sky); manualState.pty = 0; manualState.wind = 0; }
+    if (btn.dataset.pty)  { manualState.pty = parseInt(btn.dataset.pty); manualState.wind = 0; }
+    if (btn.dataset.wind) { manualState.wind = 1; manualState.pty = 0; }
+  });
+});
+
+document.getElementById('applyManual').addEventListener('click', () => {
+  if (manualState.temp === null) { alert('온도를 선택해 주세요!'); return; }
+  weatherState = {
+    temp: manualState.temp,
+    pty:  manualState.pty,
+    sky:  manualState.sky,
+    wind: manualState.wind,
+    loaded: true
+  };
+  // 날씨 표시 업데이트
+  document.getElementById('weatherIcon').textContent = getSkyIcon(weatherState.sky, weatherState.pty);
+  document.getElementById('weatherTemp').textContent = `${weatherState.temp}°C`;
+  document.getElementById('weatherDesc').textContent =
+    manualState.wind ? '바람' : getSkyDesc(weatherState.sky, weatherState.pty);
+  document.getElementById('weatherDisplay').classList.remove('hidden');
+  document.getElementById('weatherError').classList.add('hidden');
+  document.getElementById('weatherTip').textContent = '직접 설정한 날씨 기준으로 코디를 추천해 드려요 ✨';
+  buildRecommendation();
+});
+
+// ─────────────────────────────────────────
 //  초기화
 // ─────────────────────────────────────────
 renderCloset();
@@ -744,3 +831,5 @@ CATS.forEach(cat => {
   slotIndex[cat] = 0;
   renderSlot(cat);
 });
+
+initApiKeyUI();

@@ -15,7 +15,7 @@
   <div class="nav-tabs">
     <button class="nav-btn" data-tab="dashboard">🏠 대시보드</button>
     <button class="nav-btn active" data-tab="closet">👗 옷장</button>
-    <button class="nav-btn" data-tab="outfits">💾 내 코디 기록</button>
+    <button class="nav-btn" data-tab="outfits">💾 저장한 코디</button>
     <button class="nav-btn" data-tab="favorites">⭐ 즐겨찾기</button>
   </div>
   <button class="btn-upload-open" id="openUpload">+ 옷 추가</button>
@@ -29,7 +29,16 @@
   <!-- Weather bar -->
   <div class="weather-bar">
     <div class="weather-left">
-      <div class="weather-location-row">
+
+      <!-- API 키 입력 -->
+      <div class="apikey-row" id="apikeyRow">
+        <input id="apikeyInput" class="apikey-input" type="password" placeholder="기상청 API 키 입력" />
+        <button class="btn-weather btn-apikey-save" id="saveApiKey">저장</button>
+        <button class="btn-weather btn-apikey-toggle" id="toggleApiKey" style="display:none">🔑 키 변경</button>
+      </div>
+
+      <!-- 지역 + 날씨 조회 -->
+      <div class="weather-location-row" id="weatherFetchRow">
         <input id="locationInput" class="location-input" type="text" placeholder="지역 입력 (예: 부산)" />
         <button class="btn-weather" id="fetchWeather">날씨 조회</button>
       </div>
@@ -40,8 +49,37 @@
       </div>
       <div id="weatherError" class="weather-error hidden"></div>
     </div>
+
     <div class="weather-right">
-      <span class="weather-tip" id="weatherTip">날씨를 조회하면 오늘의 추천 코디가 나타납니다 ☁️</span>
+      <!-- 수동 날씨 선택 -->
+      <div class="manual-weather">
+        <div class="manual-title">✋ 직접 날씨 설정</div>
+        <div class="manual-row">
+          <span class="manual-label">🌡️ 온도</span>
+          <div class="temp-chips" id="tempChips">
+            <button class="mchip" data-temp="35">35°+ 폭염</button>
+            <button class="mchip" data-temp="28">28° 더움</button>
+            <button class="mchip" data-temp="23">23° 따뜻</button>
+            <button class="mchip" data-temp="18">18° 선선</button>
+            <button class="mchip" data-temp="12">12° 쌀쌀</button>
+            <button class="mchip" data-temp="5">5° 추움</button>
+            <button class="mchip" data-temp="-5">영하 한파</button>
+          </div>
+        </div>
+        <div class="manual-row">
+          <span class="manual-label">🌤️ 날씨</span>
+          <div class="sky-chips" id="skyChips">
+            <button class="mchip" data-sky="1">☀️ 맑음</button>
+            <button class="mchip" data-sky="3">⛅ 구름</button>
+            <button class="mchip" data-sky="4">☁️ 흐림</button>
+            <button class="mchip" data-pty="1">🌧️ 비</button>
+            <button class="mchip" data-pty="3">❄️ 눈</button>
+            <button class="mchip" data-wind="1">💨 바람</button>
+          </div>
+        </div>
+        <button class="btn-manual-apply" id="applyManual">이 날씨로 추천받기</button>
+      </div>
+      <span class="weather-tip" id="weatherTip">날씨를 조회하거나 직접 설정하면 추천 코디가 나타납니다 ☁️</span>
     </div>
   </div>
 

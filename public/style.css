@@ -164,12 +164,70 @@ body {
 .weather-error { color: #e05c5c; font-size: 0.85rem; padding: 0.3rem 0; }
 .weather-error.hidden { display: none; }
 
-.weather-right { flex: 1; min-width: 180px; }
+.weather-right { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 0.6rem; }
 .weather-tip {
   font-size: 0.85rem;
   color: var(--text-light);
   font-style: italic;
 }
+
+/* API 키 입력 */
+.apikey-row { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.apikey-input {
+  border: 1.5px solid var(--mint);
+  border-radius: 30px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-family: 'SUIT', sans-serif;
+  outline: none;
+  background: white;
+  width: 200px;
+  transition: border-color 0.2s;
+}
+.apikey-input:focus { border-color: var(--mint-dark); }
+.btn-apikey-save { background: var(--pink) !important; }
+.btn-apikey-toggle { background: #aaa !important; font-size: 0.78rem !important; padding: 0.35rem 0.75rem !important; }
+
+/* 수동 날씨 */
+.manual-weather {
+  background: rgba(255,255,255,0.7);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border: 1px solid rgba(178,237,224,0.5);
+}
+.manual-title { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.manual-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.manual-label { font-size: 0.75rem; color: var(--text-light); white-space: nowrap; min-width: 55px; }
+.mchip {
+  border: 1.5px solid var(--mint);
+  background: white;
+  border-radius: 20px;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: 'SUIT', sans-serif;
+  transition: all 0.15s;
+  color: var(--text);
+}
+.mchip:hover { background: var(--mint-light); }
+.mchip.active { background: var(--mint-dark); color: white; border-color: var(--mint-dark); }
+.btn-manual-apply {
+  background: linear-gradient(135deg, var(--mint), var(--mint-dark));
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.35rem 1rem;
+  font-size: 0.8rem;
+  font-family: 'SUIT', sans-serif;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: opacity 0.2s;
+  margin-top: 0.1rem;
+}
+.btn-manual-apply:hover { opacity: 0.88; }
 
 /* ── COMBO BOARD (통합 코디 조합판) ── */
 .combo-board {

@@ -139,7 +139,7 @@ async function fetchWeather(cityName) {
   try {
     // 1) 초단기실황 → 기온(T1H), 강수형태(PTY)
     const { baseDate: d1, baseTime: t1 } = getBaseDateTime();
-    const ncstUrl = `/weather?endpoint=getUltraSrtNcst&serviceKey=${getApiKey()}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${d1}&base_time=${t1}&nx=${nx}&ny=${ny}`;
+    const ncstUrl = `/api/weather?endpoint=getUltraSrtNcst&serviceKey=${getApiKey()}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${d1}&base_time=${t1}&nx=${nx}&ny=${ny}`;
 
     const r1 = await fetch(ncstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     const j1 = await r1.json();
@@ -153,7 +153,7 @@ async function fetchWeather(cityName) {
 
     // 2) 초단기예보 → 하늘상태(SKY)
     const { baseDate: d2, baseTime: t2 } = getUltraSrtFcstTime();
-    const fcstUrl = `/weather?endpoint=getUltraSrtFcst&serviceKey=${getApiKey()}&numOfRows=60&pageNo=1&dataType=JSON&base_date=${d2}&base_time=${t2}&nx=${nx}&ny=${ny}`;
+    const fcstUrl = `/api/weather?endpoint=getUltraSrtFcst&serviceKey=${getApiKey()}&numOfRows=60&pageNo=1&dataType=JSON&base_date=${d2}&base_time=${t2}&nx=${nx}&ny=${ny}`;
     const r2 = await fetch(fcstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     const j2 = await r2.json();
 

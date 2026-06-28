@@ -359,23 +359,51 @@ document.getElementById('btnFavorite').addEventListener('click', () => {
   openNameModal('즐겨찾기 코디 이름을 입력하세요');
 });
 
+function todayStr() {
+  // input[type=date]용 YYYY-MM-DD 형식
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function defaultOutfitName(dateStr) {
+  // "6/29" 형식의 기본 이름
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 function openNameModal(title) {
   document.getElementById('nameModalTitle').textContent = title;
-  document.getElementById('outfitNameInput').value = '';
+  const dateInput = document.getElementById('outfitDateInput');
+  dateInput.value = todayStr();
+  document.getElementById('outfitNameInput').value = defaultOutfitName(dateInput.value);
   document.getElementById('nameModal').classList.remove('hidden');
 }
+
+// 날짜를 바꾸면 이름 기본값도 그 날짜에 맞게 갱신 (사용자가 이름을 직접 수정하지 않은 경우에만)
+document.getElementById('outfitDateInput').addEventListener('change', (e) => {
+  const nameInput = document.getElementById('outfitNameInput');
+  const wasDefault = nameInput.dataset.userEdited !== 'true';
+  if (wasDefault) nameInput.value = defaultOutfitName(e.target.value);
+});
+document.getElementById('outfitNameInput').addEventListener('input', (e) => {
+  e.target.dataset.userEdited = 'true';
+});
+
 document.getElementById('closeNameModal').addEventListener('click', () => {
   document.getElementById('nameModal').classList.add('hidden');
 });
 
 document.getElementById('confirmOutfitName').addEventListener('click', () => {
-  const name = document.getElementById('outfitNameInput').value.trim();
-  if (!name) { alert('코디 이름을 입력해 주세요.'); return; }
-  saveCurrentOutfit(name, pendingOutfitMode);
+  const dateVal = document.getElementById('outfitDateInput').value || todayStr();
+  const nameInput = document.getElementById('outfitNameInput').value.trim();
+  const name = nameInput || defaultOutfitName(dateVal);
+  saveCurrentOutfit(name, pendingOutfitMode, dateVal);
   document.getElementById('nameModal').classList.add('hidden');
 });
 
-function saveCurrentOutfit(name, mode) {
+function saveCurrentOutfit(name, mode, dateVal) {
   const CATS = ['악세사리', '상의', '겉옷', '하의', '신발'];
   const items = [];
   let wearIds = [];
@@ -391,20 +419,30 @@ function saveCurrentOutfit(name, mode) {
 
   if (items.length === 0) { alert('추천된 옷이 없어요. 먼저 날씨를 조회하고 옷을 추가해 주세요!'); return; }
 
+  // 선택한 날짜를 기준으로 시각을 기록한다 (시간은 정오로 고정해 시간대 영향 최소화)
+  const wornDate = new Date(dateVal + 'T12:00:00');
+  const wornISO = wornDate.toISOString();
+
   const outfit = {
     id: Date.now(),
     name,
     items,
-    date: new Date().toLocaleDateString('ko-KR'),
+    date: wornDate.toLocaleDateString('ko-KR'),
     weather: weatherState.loaded ? `${weatherState.temp}°C · ${getSkyDesc(weatherState.sky, weatherState.pty)}` : '',
   };
 
   if (mode === 'outfit') {
-    // 착용 횟수 증가
+    // 착용 횟수 증가 + 선택한 날짜를 착용일로 기록
     const clothes = loadClothes();
     wearIds.forEach(id => {
       const c = clothes.find(x => x.id === id);
-      if (c) { c.wearCount = (c.wearCount || 0) + 1; c.lastWorn = new Date().toISOString(); }
+      if (c) {
+        c.wearCount = (c.wearCount || 0) + 1;
+        // 기존 마지막 착용일보다 더 최근(또는 비어있던 경우)일 때만 갱신
+        if (!c.lastWorn || new Date(wornISO) > new Date(c.lastWorn)) {
+          c.lastWorn = wornISO;
+        }
+      }
     });
     saveClothes(clothes);
 
@@ -656,8 +694,12 @@ function renderWearSummary() {
   const sorted = [...pool].sort((a, b) => (b.wearCount||0) - (a.wearCount||0));
   const top    = sorted[0];
   const unworn = pool.filter(c => (c.wearCount||0) === 0);
-  const oldest = pool.filter(c => c.lastWorn)
-    .sort((a, b) => new Date(a.lastWorn) - new Date(b.lastWorn))[0];
+  const wornBefore = pool.filter(c => c.lastWorn)
+    .sort((a, b) => new Date(a.lastWorn) - new Date(b.lastWorn));
+  // "오래 안 입은 옷"은 한 번도 안 입은 옷이 최우선이고, 모두 한 번씩은 입었다면
+  // lastWorn이 가장 오래된 옷을 보여준다.
+  const oldestUnworn = unworn[0];
+  const oldestWorn = wornBefore[0];
 
   document.getElementById('wearSummary').innerHTML = `
     <div class="wear-card">
@@ -672,7 +714,11 @@ function renderWearSummary() {
     </div>
     <div class="wear-card">
       <h4>🕰️ 오래 안 입은 옷 <span class="wear-filter-badge">${filterLabel}</span></h4>
-      <p>${oldest ? `${oldest.name} <em>(${timeAgo(oldest.lastWorn)} 전)</em>` : '—'}</p>
+      <p>${
+        oldestUnworn ? `${oldestUnworn.name} <em>(한 번도 안 입음)</em>`
+        : oldestWorn ? `${oldestWorn.name} <em>(${timeAgo(oldestWorn.lastWorn)})</em>`
+        : '—'
+      }</p>
     </div>
   `;
 }
@@ -680,9 +726,9 @@ function renderWearSummary() {
 function timeAgo(iso) {
   const d = Math.floor((Date.now() - new Date(iso)) / 86400000);
   if (d === 0) return '오늘';
-  if (d < 7) return `${d}일`;
-  if (d < 30) return `${Math.floor(d/7)}주`;
-  return `${Math.floor(d/30)}개월`;
+  if (d < 7) return `${d}일 전`;
+  if (d < 30) return `${Math.floor(d/7)}주 전`;
+  return `${Math.floor(d/30)}개월 전`;
 }
 
 // ─────────────────────────────────────────

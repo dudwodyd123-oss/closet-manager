@@ -58,7 +58,17 @@ const CITY_COORDS = {
 //  LocalStorage 헬퍼
 // ─────────────────────────────────────────
 function loadClothes()  { return JSON.parse(localStorage.getItem('closet_clothes')  || '[]'); }
-function saveClothes(d) { localStorage.setItem('closet_clothes', JSON.stringify(d)); }
+function saveClothes(d) {
+  try {
+    localStorage.setItem('closet_clothes', JSON.stringify(d));
+  } catch (err) {
+    if (err.name === 'QuotaExceededError') {
+      alert('저장 공간이 가득 찼어요. 옷 사진 용량이 너무 커요 — 사진 크기가 작은 옷부터 등록해 보시거나, 안 쓰는 옷을 정리해 주세요.');
+    } else {
+      console.error('저장 실패:', err);
+    }
+  }
+}
 function loadOutfits()  { return JSON.parse(localStorage.getItem('closet_outfits')  || '[]'); }
 function saveOutfits(d) { localStorage.setItem('closet_outfits', JSON.stringify(d)); }
 function loadFavs()     { return JSON.parse(localStorage.getItem('closet_favs')     || '[]'); }
@@ -440,16 +450,46 @@ function openUploadModal() {
   document.getElementById('uploadModal').classList.remove('hidden');
 }
 
-// Image preview
-document.getElementById('imgInput').addEventListener('change', function () {
+// Image preview (리사이즈 + 압축해서 로컬 스토리지 용량 초과 방지)
+function resizeImage(file, maxSize = 500, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxSize) {
+          height = Math.round(height * (maxSize / width));
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = Math.round(width * (maxSize / height));
+          height = maxSize;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('imgInput').addEventListener('change', async function () {
   const file = this.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    uploadedImageData = e.target.result;
+  try {
+    uploadedImageData = await resizeImage(file);
     document.getElementById('previewBox').innerHTML = `<img src="${uploadedImageData}" alt="미리보기"/>`;
-  };
-  reader.readAsDataURL(file);
+  } catch (err) {
+    console.error('이미지 처리 실패:', err);
+    alert('이미지를 불러오지 못했어요. 다른 사진으로 시도해 주세요.');
+  }
 });
 
 // Tag buttons

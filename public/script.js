@@ -151,7 +151,7 @@ async function fetchWeather(cityName) {
     const { baseDate: d1, baseTime: t1 } = getBaseDateTime();
     const ncstUrl = `/api/weather?endpoint=getUltraSrtNcst&serviceKey=${getApiKey()}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${d1}&base_time=${t1}&nx=${nx}&ny=${ny}`;
 
-    const r1 = await fetch(ncstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const r1 = await fetch(ncstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, cache: 'no-store' });
     const j1 = await r1.json();
 
     let temp = null, pty = 0;
@@ -164,7 +164,7 @@ async function fetchWeather(cityName) {
     // 2) 초단기예보 → 하늘상태(SKY)
     const { baseDate: d2, baseTime: t2 } = getUltraSrtFcstTime();
     const fcstUrl = `/api/weather?endpoint=getUltraSrtFcst&serviceKey=${getApiKey()}&numOfRows=60&pageNo=1&dataType=JSON&base_date=${d2}&base_time=${t2}&nx=${nx}&ny=${ny}`;
-    const r2 = await fetch(fcstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const r2 = await fetch(fcstUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, cache: 'no-store' });
     const j2 = await r2.json();
 
     let sky = 1;

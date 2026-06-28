@@ -5,7 +5,19 @@
 // 서버 대 서버 통신이라 CORS 정책에 걸리지 않는다.
 
 export default async function handler(req, res) {
-  const { endpoint, ...params } = req.query;
+  // 날씨 데이터는 시간마다 바뀌므로 캐시를 사용하지 않도록 명시한다.
+  // (캐시된 304 응답을 계속 재사용하면 예전 응답이 그대로 반복될 수 있다)
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+
+  // req.url에서 원본 쿼리스트링을 그대로 추출한다.
+  // URLSearchParams로 한 번 더 파싱+조립하면 서비스키의 특수문자(+, /, = 등)가
+  // 디코딩 후 재인코딩되며 원래 값과 달라지는 "이중 인코딩" 문제가 생길 수 있다.
+  // 그래서 문자열 그대로 잘라서 기상청 주소에 붙여 보낸다 (파싱하지 않음).
+  const queryIndex = req.url.indexOf('?');
+  const rawQuery = queryIndex >= 0 ? req.url.slice(queryIndex + 1) : '';
+
+  const endpointMatch = rawQuery.match(/(?:^|&)endpoint=([^&]*)/);
+  const endpoint = endpointMatch ? decodeURIComponent(endpointMatch[1]) : null;
 
   if (!endpoint) {
     res.status(400).json({ error: 'endpoint 파라미터가 필요합니다.' });
@@ -19,7 +31,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  const query = new URLSearchParams(params).toString();
+  // endpoint=... 부분만 제거하고, 나머지 쿼리스트링은 원본 그대로(재인코딩 없이) 사용
+  const query = rawQuery.replace(/(?:^|&)endpoint=[^&]*/, '').replace(/^&/, '');
   const targetUrl = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/${endpoint}?${query}`;
 
   try {
